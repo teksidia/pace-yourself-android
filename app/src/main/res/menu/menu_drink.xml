@@ -1,11 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.teksidia.paceyourself.MainActivity">
-
+    tools:context="com.teksidia.paceyourself.DrinkActivity">
     <item
-        android:id="@+id/quit"
-        android:orderInCategory="110"
-        android:title="@string/action_quit"
+        android:id="@+id/reset"
+        android:orderInCategory="100"
+        android:title="@string/action_reset"
         app:showAsAction="never" />
 </menu>
