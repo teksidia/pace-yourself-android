@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
-    tools:showIn="@layout/activity_start">
+    tools:showIn="@layout/activity_start"
+    android:background="@drawable/bg">
 
     <NumberPicker
         android:id="@+id/np"
@@ -15,6 +16,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:background="#FFF"
         android:theme="@style/NumberPickerText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -28,6 +30,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
+        android:background="#FFF"
         android:gravity="center_horizontal"
         android:text="@string/finish_time_default"
         android:textSize="60sp"
@@ -62,7 +65,7 @@
     <Button
         android:id="@+id/button_start"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"

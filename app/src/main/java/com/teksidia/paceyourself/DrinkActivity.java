@@ -3,12 +3,11 @@ package com.teksidia.paceyourself;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,6 +26,7 @@ public class DrinkActivity extends AppCompatActivity {
     public static final String TARGET_MINUTE = "com.teksidia.paceyourself.TARGET_MINUTE";
 
     private TextView mCountdown;
+    private TextView mFinishTimeLabel;
     private CountDownTimer mCountdownTimer;
     private LinearLayout mBeerContainer;
     private Button mNextButton;
@@ -34,6 +34,8 @@ public class DrinkActivity extends AppCompatActivity {
     private int mTargetAmount;
     private long mSessionTimeInMillisecs;
     private int mDrinksConsumed = 0;
+    private int mTargetHour;
+    private int mTargetMinute;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,8 @@ public class DrinkActivity extends AppCompatActivity {
         mCountdown = findViewById(R.id.text_countdown);
         mBeerContainer = findViewById(R.id.linear_beers);
         mNextButton = findViewById(R.id.button_next_drink);
+        mFinishTimeLabel = findViewById(R.id.text_finish_time);
+
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,26 +58,28 @@ public class DrinkActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         mTargetAmount = intent.getIntExtra(TARGET_AMOUNT, 0);
-        int targetHour = intent.getIntExtra(TARGET_HOUR, 0);
-        int targetMinute = intent.getIntExtra(TARGET_MINUTE, 0);
+        mTargetHour = intent.getIntExtra(TARGET_HOUR, 0);
+        mTargetMinute = intent.getIntExtra(TARGET_MINUTE, 0);
 
-        mSessionTimeInMillisecs = setSessionTime(targetHour, targetMinute);
+        mFinishTimeLabel.setText(String.format("Finish time: %s:%s", String.format("%02d", mTargetHour), String.format("%02d", mTargetMinute)));
 
         nextDrink(true);
 
     }
 
-    private long setSessionTime(int targetHour, int targetMinute) {
+    private long setSessionTime() {
         Calendar dateTimeNow = Calendar.getInstance();
         Calendar dateTimeTarget = Calendar.getInstance();
-        if(targetHour < dateTimeNow.get(Calendar.HOUR_OF_DAY)) {
+        if(mTargetHour < dateTimeNow.get(Calendar.HOUR_OF_DAY)) {
             dateTimeTarget.add(Calendar.DAY_OF_YEAR, 1);
         }
-        dateTimeTarget.set(Calendar.HOUR_OF_DAY, targetHour);
-        dateTimeTarget.set(Calendar.MINUTE, targetMinute);
+        dateTimeTarget.set(Calendar.HOUR_OF_DAY, mTargetHour);
+        dateTimeTarget.set(Calendar.MINUTE, mTargetMinute);
         long now = dateTimeNow.getTimeInMillis();
         long target = dateTimeTarget.getTimeInMillis();
-        return (target - now);
+        long timeLeftInMillisecs = (target - now);
+        Log.d("timing", "Minutes left:" + timeLeftInMillisecs / (1000 * 60));
+        return timeLeftInMillisecs;
     }
 
     private void nextDrink(boolean isStart) {
@@ -83,21 +89,28 @@ public class DrinkActivity extends AppCompatActivity {
         }
 
         final int drinksRemaining = (mTargetAmount - mDrinksConsumed);
+        mSessionTimeInMillisecs = setSessionTime();
 
         adjustBeerIndicator(drinksRemaining);
 
         if(drinksRemaining == 0) {
-            mCountdownTimer.cancel();
-            mCountdown.setText("Stop drinking");
-            mNextButton.setEnabled(false);
+            Intent intent = new Intent(DrinkActivity.this, CompleteActivity.class);
+            intent.putExtra(CompleteActivity.SESSION_EXPIRED, mSessionTimeInMillisecs <= 0);
+            startActivity(intent);
+            finish();
             return;
         }
 
         if(drinksRemaining == 1) {
-            mNextButton.setText("Complete Session");
+            mNextButton.setText("Complete session");
         }
 
-        long millisecsPerDrink = mSessionTimeInMillisecs / drinksRemaining;
+        long millisecsPerDrink = 0;
+        if(mSessionTimeInMillisecs <= 0) {
+            mCountdown.setText("Time up");
+        } else {
+            millisecsPerDrink = mSessionTimeInMillisecs / drinksRemaining;
+        }
 
         if(mCountdownTimer != null) {
             mCountdownTimer.cancel();
@@ -114,7 +127,15 @@ public class DrinkActivity extends AppCompatActivity {
             }
 
             public void onFinish() {
-                mCountdown.setText("Time for your next drink!");
+                final int drinksRemaining = (mTargetAmount - mDrinksConsumed);
+
+                if(drinksRemaining == 1) {
+                    mCountdown.setText("Time up");
+                    mNextButton.setText("Complete session");
+                } else {
+                    mCountdown.setText("Get next drink!");
+                }
+
             }
         };
 

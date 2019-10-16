@@ -9,4 +9,8 @@
     <string name="finish_time_label">What time do you want to finish?</string>
     <string name="target_label">How many drinks do you want?</string>
     <string name="start_button_text">Start Session</string>
+    <string name="title_activity_complete">Complete</string>
+    <string name="start_again">Start Again</string>
+    <string name="complete_text">Session finished</string>
+    <string name="complete">Complete</string>
 </resources>
